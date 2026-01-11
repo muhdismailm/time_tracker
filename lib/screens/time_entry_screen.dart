@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/time_provider.dart';
 import '../models/time_entry.dart';
+import '../widgets/app_drawer.dart'; // ✅ Drawer import
 
 class TimeEntryScreen extends StatefulWidget {
   const TimeEntryScreen({super.key});
@@ -66,13 +67,14 @@ class _TimeEntryScreenState extends State<TimeEntryScreen> {
 
     context.read<TimeProvider>().addEntry(
           TimeEntry(
-            id: DateTime.now().toString(),
-            taskName:
-                taskController.text.isEmpty ? 'Unnamed Task' : taskController.text,
-            startTime: start,
-            endTime: end,
-          ),
-        );
+  id: DateTime.now().toString(),
+  projectId: 'project-id-here', // 🔹 temporary / later selectable
+  taskName: taskController.text.isEmpty
+      ? 'Unnamed Task'
+      : taskController.text,
+  startTime: start,
+  endTime: end,
+));
 
     Navigator.pop(context);
   }
@@ -80,7 +82,13 @@ class _TimeEntryScreenState extends State<TimeEntryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Time Entry')),
+      appBar: AppBar(
+        title: const Text('Add Time Entry'),
+      ),
+
+      // ✅ Navigation Drawer
+      drawer: const AppDrawer(),
+
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
