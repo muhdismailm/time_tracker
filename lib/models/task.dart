@@ -1,36 +1,38 @@
-enum TaskPriority { high, medium, low }
+enum TaskPriority { low, medium, high }
 
 class Task {
   final String id;
   final String projectId;
   String name;
-  TaskPriority priority; // ✅ REQUIRED FIELD
+  TaskPriority priority;
+  bool isCompleted; // ✅ NEW
 
   Task({
     required this.id,
     required this.projectId,
     required this.name,
-    this.priority = TaskPriority.medium, // ✅ DEFAULT
+    required this.priority,
+    this.isCompleted = false,
   });
 
-  /// Convert Task → Map (for local storage)
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'projectId': projectId,
       'name': name,
-      'priority': priority.index,
+      'priority': priority.name,
+      'isCompleted': isCompleted,
     };
   }
 
-  /// Convert Map → Task
   factory Task.fromMap(Map<String, dynamic> map) {
     return Task(
       id: map['id'],
       projectId: map['projectId'],
       name: map['name'],
-      priority: TaskPriority.values[
-          map['priority'] ?? TaskPriority.medium.index],
+      priority: TaskPriority.values
+          .firstWhere((e) => e.name == map['priority']),
+      isCompleted: map['isCompleted'] ?? false,
     );
   }
 }

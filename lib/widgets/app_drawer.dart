@@ -24,7 +24,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 SizedBox(height: 10),
                 Text(
-                  'Time Tracker',
+                  'Menu',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 22,

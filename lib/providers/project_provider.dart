@@ -9,6 +9,8 @@ class ProjectProvider with ChangeNotifier {
   List<Project> _projects = [];
   List<Task> _tasks = [];
 
+  // ================= GETTERS =================
+
   /// Active (non-archived) projects
   List<Project> get activeProjects =>
       _projects.where((p) => !p.isArchived).toList();
@@ -16,6 +18,8 @@ class ProjectProvider with ChangeNotifier {
   /// Get tasks under a project
   List<Task> tasksByProject(String projectId) =>
       _tasks.where((t) => t.projectId == projectId).toList();
+
+  // ================= LOAD =================
 
   /// Load projects & tasks from local storage
   Future<void> load() async {
@@ -39,6 +43,8 @@ class ProjectProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // ================= PROJECT METHODS =================
+
   /// Add new project
   Future<void> addProject(String name, Color color, int targetHours) async {
     _projects.add(
@@ -53,7 +59,8 @@ class ProjectProvider with ChangeNotifier {
   }
 
   /// Edit existing project
-  Future<void> editProject(Project project, String newName, int targetHours) async {
+  Future<void> editProject(
+      Project project, String newName, int targetHours) async {
     project.name = newName;
     project.targetHours = targetHours;
     await _save();
@@ -65,6 +72,15 @@ class ProjectProvider with ChangeNotifier {
     await _save();
   }
 
+  /// Delete project (also deletes its tasks)
+  Future<void> deleteProject(String projectId) async {
+    _projects.removeWhere((p) => p.id == projectId);
+    _tasks.removeWhere((t) => t.projectId == projectId);
+    await _save();
+  }
+
+  // ================= TASK METHODS =================
+
   /// Add task to a project
   Future<void> addTask(
       String projectId, String name, TaskPriority priority) async {
@@ -74,8 +90,25 @@ class ProjectProvider with ChangeNotifier {
         projectId: projectId,
         name: name,
         priority: priority,
+        isCompleted: false,
       ),
     );
+    await _save();
+  }
+
+  /// Edit task
+  Future<void> editTask(
+      String taskId, String newName, TaskPriority priority) async {
+    final task = _tasks.firstWhere((t) => t.id == taskId);
+    task.name = newName;
+    task.priority = priority;
+    await _save();
+  }
+
+  /// Toggle task completion
+  Future<void> toggleTask(String taskId) async {
+    final task = _tasks.firstWhere((t) => t.id == taskId);
+    task.isCompleted = !task.isCompleted;
     await _save();
   }
 
@@ -85,16 +118,18 @@ class ProjectProvider with ChangeNotifier {
     await _save();
   }
 
+  // ================= SAVE =================
+
   /// Save to SharedPreferences
   Future<void> _save() async {
     final prefs = await SharedPreferences.getInstance();
 
-    prefs.setString(
+    await prefs.setString(
       'projects',
       jsonEncode(_projects.map((e) => e.toMap()).toList()),
     );
 
-    prefs.setString(
+    await prefs.setString(
       'tasks',
       jsonEncode(_tasks.map((e) => e.toMap()).toList()),
     );
